@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CategoryCard from '../components/CategoryCard';
 import ProductCardWithFavorites from '../components/ProductCardWithFavorites';
@@ -22,8 +22,8 @@ export function Home() {
 	} = useProducts();
 	const { searchTerm, clearSearch } = useSearch();
 
-	const handleOpen = () => setShowWelcome(true);
-	const handleClose = () => setShowWelcome(false);
+	const handleOpen = useCallback(() => setShowWelcome(true), []);
+	const handleClose = useCallback(() => setShowWelcome(false), []);
 
 	const handleCategoryClick = (categoryId: string | number) => {
 		setSelectedCategory(categoryId);
@@ -35,17 +35,18 @@ export function Home() {
 		clearSearch(); // Clears the search when returning to home
 	};
 
-	const handleViewProduct = (productId: string | number) => {
+	const handleViewProduct = useCallback((productId: string | number) => {
 		navigate(`/product/${productId}`);
-	};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
-	const randomProducts = () => {
-		console.log('CHAMOU A FUNÇÃO');
+	const randomProducts = useMemo(() => {
+		// console.log('CHAMOU A FUNÇÃO');
 		if (products.length === 0) return [];
 
 		const shuffled = [...products].sort(() => 0.5 - Math.random());
 		return shuffled.slice(0, 4);
-	};
+	}, [products]);
 
 	const filteredProducts = selectedCategory
 		? (() => {
@@ -72,7 +73,7 @@ export function Home() {
 	// Search results
 	const searchResults = searchTerm
 		? (() => {
-				console.log('CHAMOU A FUNÇÃO DE BUSCA');
+				// console.log('CHAMOU A FUNÇÃO DE BUSCA');
 				const lowercaseQuery = searchTerm.toLowerCase();
 				return products.filter(
 					product =>
@@ -334,9 +335,9 @@ export function Home() {
 
 						{!productsLoading &&
 							!productsError &&
-							randomProducts().length > 0 && (
+							randomProducts.length > 0 && (
 								<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6'>
-									{randomProducts().map(product => (
+									{randomProducts.map(product => (
 										<ProductCardWithFavorites
 											key={product.id}
 											image={product.image}
